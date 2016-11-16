@@ -9,18 +9,25 @@ const itemMasterEndpoint =
   process.env.ITEM_MASTER_ENDPOINT ||'http://localhost:5000/items'
 
 app.get('/inventory/:id', (req, res) => {
-  const inventoryResultP = request(`${inventoryEndpoint}/${req.params.id}`)
-  const itemResultP = request(`${itemMasterEndpoint}/${req.params.id}`)
+  const id = req.params.id
+  const inventoryResultP = request(`${inventoryEndpoint}/${id}`)
+  const itemResultP = request(`${itemMasterEndpoint}/${id}`)
+
   Promise.all([inventoryResultP, itemResultP])
     .then(([inventoryResult, itemResult]) => {
+      
       const qty = JSON.parse(inventoryResult.body).qty
       const itemName = JSON.parse(itemResult.body).itemName
-      res.json({ itemId: req.params.id, itemName: itemName, qty: qty })
+      const result = { itemId: id, itemName: itemName, qty: qty }
+      console.log(`GET <id: ${id}> Result: ${JSON.stringify(result)}`)
+      res.json(result)
+  
     })
     .catch(e => {
       console.log(e)
       res.status(500)
       res.json({ error: e.message })
+  
     })
 })
 
